@@ -7,6 +7,21 @@ function HTMLActuator() {
   this.score = 0;
 }
 
+// lifted from http://stackoverflow.com/a/9083076/2967
+function romanize (num) {
+  if (!+num)
+    return false;
+  var digits = String(+num).split(""),
+  key = ["","C","CC","CCC","CD","D","DC","DCC","DCCC","CM",
+         "","X","XX","XXX","XL","L","LX","LXX","LXXX","XC",
+         "","I","II","III","IV","V","VI","VII","VIII","IX"],
+  roman = "",
+  i = 3;
+  while (i--)
+    roman = (key[+digits.pop() + (i * 10)] || "") + roman;
+  return Array(+digits.join("") + 1).join("M") + roman;
+}
+
 HTMLActuator.prototype.actuate = function (grid, metadata) {
   var self = this;
 
@@ -62,7 +77,7 @@ HTMLActuator.prototype.addTile = function (tile) {
   this.applyClasses(wrapper, classes);
 
   inner.classList.add("tile-inner");
-  inner.textContent = tile.value;
+  inner.textContent = romanize(tile.value);
 
   if (tile.previousPosition) {
     // Make sure that the tile gets rendered in the previous position first
@@ -109,7 +124,7 @@ HTMLActuator.prototype.updateScore = function (score) {
   var difference = score - this.score;
   this.score = score;
 
-  this.scoreContainer.textContent = this.score;
+  this.scoreContainer.textContent = romanize(this.score);
 
   if (difference > 0) {
     var addition = document.createElement("div");
@@ -121,7 +136,7 @@ HTMLActuator.prototype.updateScore = function (score) {
 };
 
 HTMLActuator.prototype.updateBestScore = function (bestScore) {
-  this.bestContainer.textContent = bestScore;
+  this.bestContainer.textContent = romanize(bestScore);
 };
 
 HTMLActuator.prototype.message = function (won) {
@@ -136,4 +151,20 @@ HTMLActuator.prototype.clearMessage = function () {
   // IE only takes one value to remove at a time.
   this.messageContainer.classList.remove("game-won");
   this.messageContainer.classList.remove("game-over");
+};
+
+HTMLActuator.prototype.scoreTweetButton = function () {
+  var tweet = document.createElement("a");
+  tweet.classList.add("twitter-share-button");
+  tweet.setAttribute("href", "https://twitter.com/share");
+  tweet.setAttribute("data-via", "luismbo");
+  tweet.setAttribute("data-url", "http://luismbo.github.io/MMXLVIII");
+  tweet.setAttribute("data-counturl", "http://luismbo.github.io/MMXLVIII");
+  tweet.textContent = "Tweet";
+
+  var text = "I scored " + this.score + " points at MMXLVIII, a game where you " +
+             "join roman numerals to score high! #MMXLVIIIgame";
+  tweet.setAttribute("data-text", text);
+
+  return tweet;
 };
